@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Projects and connected memory for people and coding agents." />
+    <title>HiveMind — projects</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="HiveMind home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>HiveMind</span>
+        </a>
+        <div class="account-bar">
+          <span id="user-name" class="user-name" hidden></span>
+          <button id="logout-button" class="button button-quiet" type="button" hidden>Sign out</button>
+        </div>
+      </header>
+
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+      <main id="main-content">
+        <section id="login-view" class="auth-view" aria-labelledby="login-title">
+          <div>
+            <p class="eyebrow">Shared project memory</p>
+            <h1 id="login-title">The context behind the work.</h1>
+            <p class="lead">Keep decisions, notes, and project context in one place for your team and coding agents.</p>
+          </div>
+          <form id="login-form" class="form-card">
+            <div class="form-card-heading"><h2>Sign in</h2><span class="quiet-label">Workspace</span></div>
+            <label for="login-username">Username</label>
+            <input id="login-username" value="operator" autocomplete="username" required />
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" autocomplete="current-password" placeholder="Workspace password" required />
+            <button class="button button-primary button-wide" type="submit">Open HiveMind</button>
+            <p class="form-help">Local default: <strong>operator / operator</strong>.</p>
+            <p id="login-error" class="form-error" role="alert" hidden></p>
+          </form>
+        </section>
+
+        <section id="projects-view" hidden aria-labelledby="projects-title">
+          <div class="page-heading">
+            <div><p class="eyebrow">Workspace</p><h1 id="projects-title">Projects</h1><p class="lead">Open a project to work with its memories, people, and agent access.</p></div>
+            <button id="new-project-button" class="button button-primary" type="button">New project <span aria-hidden="true">+</span></button>
+          </div>
+          <form id="project-form" class="inline-form" hidden>
+            <div><label for="project-name">Project name</label><input id="project-name" maxlength="100" placeholder="e.g. Platform migration" required /></div>
+            <div><label for="project-description-input">Description <span class="optional">optional</span></label><input id="project-description-input" maxlength="500" placeholder="What belongs here?" /></div>
+            <div class="inline-form-actions"><button id="cancel-project-button" class="button button-quiet" type="button">Cancel</button><button class="button button-primary" type="submit">Create project</button></div>
+          </form>
+          <ul id="project-list" class="project-list" aria-label="Projects"></ul>
+          <div id="empty-projects" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">+</span><h2>No projects yet</h2><p>Create one to give your team and agents a shared place to work.</p><button class="button button-secondary" type="button" data-new-project>Create a project</button></div>
+        </section>
+
+        <section id="project-view" hidden aria-labelledby="project-title">
+          <div class="project-toolbar">
+            <button id="back-projects-button" class="back-button" type="button">← Projects</button>
+            <div class="project-title-block"><p class="eyebrow">Project</p><h1 id="project-title"></h1><p id="project-description" class="project-description"></p></div>
+            <div class="project-actions"><button id="people-button" class="button button-secondary" type="button">People</button><button id="agent-button" class="button button-secondary" type="button">Connect agent</button><button id="new-memory-button" class="button button-primary" type="button">Add memory <span aria-hidden="true">+</span></button></div>
+          </div>
+
+          <div class="project-layout">
+            <section class="graph-panel" aria-labelledby="graph-title">
+              <div class="panel-heading"><div><p class="eyebrow">Connections</p><h2 id="graph-title">Project memory</h2></div><div class="graph-controls"><button id="fit-graph-button" class="icon-button" type="button" title="Reset view" aria-label="Reset view">Fit</button><button id="zoom-out-button" class="icon-button" type="button" title="Zoom out" aria-label="Zoom out">−</button><button id="zoom-in-button" class="icon-button" type="button" title="Zoom in" aria-label="Zoom in">+</button></div></div>
+              <div id="graph-empty" class="graph-empty" hidden><strong>No memories yet.</strong><span>Add the first memory to see connections here.</span></div>
+              <svg id="memory-graph" class="memory-graph" viewBox="0 0 1000 620" role="img" aria-label="Interactive project memory graph"></svg>
+              <p class="graph-help">Drag to explore. Select a memory to edit it.</p>
+            </section>
+
+            <aside class="project-sidebar">
+              <section class="side-section">
+                <div class="side-heading"><div><h2>Memories</h2><strong id="memory-count">0</strong></div><input id="memory-search" class="small-search" type="search" placeholder="Search memories" aria-label="Search memories" /></div>
+                <div id="memory-list" class="memory-list"></div>
+              </section>
+              <section id="editor-section" class="side-section editor-section">
+                <div class="side-heading"><div><h2 id="editor-heading">Select a memory</h2><span id="editor-kicker" class="editor-state">Memory</span></div><span id="version-label" class="version-label" hidden></span></div>
+                <form id="memory-form" hidden>
+                  <label for="memory-title">Title</label><input id="memory-title" maxlength="140" required />
+                  <label for="memory-body">Memory</label><textarea id="memory-body" maxlength="20000" required></textarea>
+                  <label for="memory-tags">Tags <span class="optional">optional</span></label><input id="memory-tags" placeholder="release, python" />
+                  <div class="editor-actions"><button id="cancel-memory-button" class="button button-quiet" type="button">Cancel</button><button class="button button-primary" type="submit">Save</button></div>
+                </form>
+                <button id="empty-editor-button" class="button button-secondary" type="button">Add a memory</button>
+              </section>
+            </aside>
+          </div>
+
+          <section id="people-panel" class="drawer-panel" hidden aria-labelledby="people-title">
+            <div class="drawer-heading"><div><p class="eyebrow">Project access</p><h2 id="people-title">People</h2></div><button class="button button-quiet" type="button" data-close-panel="people-panel">Close</button></div>
+            <div id="member-list" class="member-list"></div>
+            <form id="member-form" class="member-form"><label for="member-user">Add workspace user</label><div class="member-form-row"><input id="member-user" placeholder="username" required /><select id="member-role"><option value="editor">Editor</option><option value="viewer">Viewer</option></select><button class="button button-primary" type="submit">Add</button></div><p class="form-help">The user must already be configured in this workspace.</p></form>
+          </section>
+
+          <section id="agent-panel" class="drawer-panel" hidden aria-labelledby="agent-title">
+            <div class="drawer-heading"><div><p class="eyebrow">Project connection</p><h2 id="agent-title">Connect a coding agent</h2></div><button class="button button-quiet" type="button" data-close-panel="agent-panel">Close</button></div>
+            <form id="agent-form" class="member-form"><label for="agent-label">Agent name</label><div class="member-form-row"><input id="agent-label" placeholder="Claude Code, Codex, Cursor" required /><button class="button button-primary" type="submit">Create token</button></div></form>
+            <div id="agent-result" class="agent-result" hidden><span class="quiet-label">Copy once</span><div class="token-row"><code id="agent-token"></code><button id="copy-token-button" class="button button-secondary" type="button">Copy</button></div><p class="form-help">Use this project-scoped token with HTTP or <code>HIVEMIND_AGENT_TOKEN</code> for MCP.</p></div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

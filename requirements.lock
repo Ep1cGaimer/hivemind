@@ -1,0 +1,10 @@
+# Live-profile dependency lock for the FalkorDB adapter.
+#
+# requirements.txt is the default memory-mode profile and has no third-party
+# packages. Install this file only when explicitly running the live backend or
+# building the Docker image with HIVEMIND_PROFILE=live.
+#
+# The server image pin is FalkorDB 6.0.2. The client is validated by the
+# opt-in test-live suite against the isolated project-specific server described
+# in README; the server itself is not installed by pip.
+falkordb==1.2.0

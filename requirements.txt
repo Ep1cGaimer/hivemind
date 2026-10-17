@@ -1,0 +1,7 @@
+# Offline HiveMind runtime profile.
+#
+# HiveMind's memory backend, HTTP API, MCP stdio server, UI, and offline tests
+# use only Python's standard library. Keep this file intentionally free of
+# third-party requirements so a clean checkout works without network access.
+# The live FalkorDB client is pinned separately in requirements.lock and is
+# installed only for an explicit live profile.
