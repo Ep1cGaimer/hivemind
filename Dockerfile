@@ -17,7 +17,6 @@ RUN if [ "$HIVEMIND_PROFILE" = "live" ]; then \
     fi
 
 COPY hivemind ./hivemind
-COPY demo ./demo
 COPY web ./web
 
 EXPOSE 8000
