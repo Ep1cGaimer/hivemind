@@ -6,6 +6,9 @@ HiveMind gives OpenCode Git-aware shared memory: it recalls applicable findings
 before a task and records a finding, checkpoint, or explicit no-change receipt
 after the task.
 
+For the exact hackathon recording actions and spoken narration, use
+[`demo/ledgerflow/PRESENTER_SCRIPT.md`](demo/ledgerflow/PRESENTER_SCRIPT.md).
+
 ## Live demo
 
 Assume the HiveMind server and FalkorDB are already running.
@@ -82,3 +85,32 @@ Show, in order:
 The demo proves Git-aware memory handoff, provenance, checkpoint/no-change
 handling, and native OpenCode integration. Do not claim that the full usefulness
 comparison or real-human usability study has been completed.
+
+## LedgerFlow local fixture
+
+The repository also includes a small payment-processing target and a repeatable
+no-model walkthrough for source-bound stale guidance. It uses the existing
+HiveMind `connect` CLI and Git HTTP API against an ephemeral in-memory server.
+Generated target files, bridge state, and the agent token stay under ignored
+`.local/ledgerflow/` and the generated checkout's `.git/hivemind/` directory.
+
+From the repository root:
+
+```bash
+python -m hivemind.ledgerflow_demo prepare --reset
+python -m hivemind.ledgerflow_demo demo
+python -m hivemind.ledgerflow_demo inspect
+python -m hivemind.ledgerflow_demo smoke
+```
+
+The four stages are visible in the JSON output: a writer saves a finding bound
+to the policy and implementation, a fresh consumer recalls it, a challenge
+commit changes the policy, and a second fresh consumer marks the old finding
+`historical_source_changed`. `inspect` prints the exact source bindings and
+branch provenance returned by the existing API. See
+[`demo/ledgerflow/README.md`](demo/ledgerflow/README.md) for the fixture layout.
+
+The recommended video uses the deterministic graph proof first, then the
+optional native OpenCode writer/consumer/challenge story from the presenter
+script. The deterministic proof does not make a model call, so it remains
+repeatable if the model provider is slow during recording.

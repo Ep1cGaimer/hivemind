@@ -11,4 +11,5 @@ build/
 *.egg-info/
 *.log
 .local/
+.local/ledgerflow/
 node_modules/
