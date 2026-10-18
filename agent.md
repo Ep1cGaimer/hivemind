@@ -1,5 +1,22 @@
 # HiveMind — build instructions
 
+## Current direction (supersedes the historical product boundary below)
+
+Build shared project memory that follows verified Git history. `goal.md` governs
+the active acceptance work: all model-driven integration tests use OpenCode with
+Zen only. Use authorized independent subagents for simulated usability/adversarial
+testing and label that evidence honestly. Codex/Claude native trust/session tests
+and final-submission/video/publication work are outside this run's scope.
+`HIVEMIND_IDEA.md` and `HIVEMIND_GRAPH_CONTRACT.md` are the current
+product and traversal contract. The Juniper boundary below applies only to the
+retained synthetic regression/example. Preserve its evidence semantics, existing
+notes, and the uncommitted OpenTelemetry patch. Delivery is milestone-based with
+no fixed duration cap. Keep native hook trust, project authorization, separate
+source/publication history, immutable scoped revisions and explicit incomplete
+history. OpenCode 2 automatic capture/fresh-session recall has initial real-model
+evidence; the full acceptance ledger is `testing/git_memory/ACCEPTANCE.md`.
+Transport/unit tests do not establish all model-session or usefulness gates.
+
 ## Project and goal
 
 Build **HiveMind**, an evidence-aware shared memory tool for the WeMakeDevs ×

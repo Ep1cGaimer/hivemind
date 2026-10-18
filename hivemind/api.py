@@ -10,10 +10,11 @@ import json
 import logging
 import os
 from pathlib import Path
+import sysconfig
 import sys
 import threading
 from typing import Any, Mapping
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urlparse, parse_qs
 
 from . import __version__
 from .auth import AuthManager, Identity
@@ -21,6 +22,9 @@ from .backend import BackendSelectionError, create_store, select_backend
 from .fixture import SHARED_SCOPE_ID
 from .gateway import HiveMindGateway
 from .workspace import MemoryWorkspace, ProjectWorkspace
+from .git_memory import GitMemory
+from .git_graph import RepositoryGraph
+from .store import StoreError
 
 
 MAX_REQUEST_BYTES = 1_000_000
@@ -40,8 +44,9 @@ class HiveMindRuntime:
         self.store = create_store(self._environ, backend=self._backend_name)
         self.gateway = HiveMindGateway(self.store)
         self.workspace = MemoryWorkspace(self.store)
-        self.auth = AuthManager(self._environ)
+        self.auth = AuthManager(self._environ, store=self.store)
         self.projects = ProjectWorkspace(self.store, self.auth)
+        self.git_memory = GitMemory(self.store, self.projects)
 
     def reset(self) -> dict[str, Any]:
         """Replace the graph with a fresh deterministic fixture."""
@@ -51,6 +56,8 @@ class HiveMindRuntime:
             self.gateway = HiveMindGateway(self.store)
             self.workspace = MemoryWorkspace(self.store)
             self.projects = ProjectWorkspace(self.store, self.auth)
+            self.auth.store = self.store
+            self.git_memory = GitMemory(self.store, self.projects)
             return self.gateway.state()
 
     def health(self) -> dict[str, Any]:
@@ -106,7 +113,7 @@ class HiveMindHTTPServer(ThreadingHTTPServer):
 class HiveMindRequestHandler(BaseHTTPRequestHandler):
     """Route JSON API calls and safe static files from an optional ``web/``."""
 
-    server_version = "HiveMindHTTP/0.1"
+    server_version = "HiveMindHTTP/0.2"
 
     def log_message(self, format: str, *args: Any) -> None:
         """Keep the API quiet by default; callers can inspect response bodies."""
@@ -117,7 +124,8 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
 
     @property
     def web_root(self) -> Path:
-        return Path(__file__).resolve().parent.parent / "web"
+        checkout = Path(__file__).resolve().parent.parent / "web"
+        return checkout if checkout.is_dir() else Path(sysconfig.get_path('data')) / 'share' / 'hivemind' / 'web'
 
     def _send_json(
         self,
@@ -154,6 +162,14 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
         code = str(result.get("error", {}).get("code", ""))
         if code.endswith("FAILED") or code in {"STATE_FAILED", "DEMO_FAILED"}:
             return HTTPStatus.INTERNAL_SERVER_ERROR
+        if code == 'FORBIDDEN':
+            return HTTPStatus.FORBIDDEN
+        if code == 'AUTH_REQUIRED':
+            return HTTPStatus.UNAUTHORIZED
+        if code == 'IMMUTABLE_CONFLICT':
+            return HTTPStatus.CONFLICT
+        if code == 'STORAGE_UNAVAILABLE':
+            return HTTPStatus.SERVICE_UNAVAILABLE
         return HTTPStatus.BAD_REQUEST
 
     def _read_json(self) -> dict[str, Any] | None:
@@ -260,6 +276,8 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             return "agents", project_id, parts[2] if len(parts) > 2 else None
         if parts[1] == "memories":
             return "memories", project_id, parts[2] if len(parts) > 2 else None
+        if parts[1] == 'git' and len(parts) == 3:
+            return 'git:' + parts[2], project_id, None
         return None
 
     def _require_project(self, project_id: str, write: bool = False) -> Identity | None:
@@ -275,6 +293,18 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             self._error("FORBIDDEN", "You do not have access to this project", HTTPStatus.FORBIDDEN)
             return None
         return identity
+
+    def _legacy_project(self, payload=None, write=False):
+        context = self._identity_context()
+        if context is None:
+            self._error('AUTH_REQUIRED', 'Sign in or provide a valid project token', HTTPStatus.UNAUTHORIZED)
+            return None
+        project = context[1] or self.headers.get('X-HiveMind-Project') or (payload or {}).get('project_id')
+        if not project:
+            self._error('PROJECT_REQUIRED', 'Select a project or use a project-scoped token')
+            return None
+        identity = self._require_project(project, write=write)
+        return (identity, project) if identity else None
 
     def _serve_static(self, path: str) -> bool:
         root = self.web_root
@@ -312,6 +342,12 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
         return True
 
     def do_GET(self) -> None:  # noqa: N802 - stdlib handler API
+        try:
+            self._handle_get()
+        except StoreError:
+            self._error('STORAGE_UNAVAILABLE', 'The configured database is unavailable; retry after it recovers', HTTPStatus.SERVICE_UNAVAILABLE)
+
+    def _handle_get(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path
         if path == "/api/auth/me":
@@ -322,11 +358,43 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
         if path == "/api/projects":
             identity = self._require_identity()
             if identity is not None:
-                self._send_json(self.runtime.projects.list_projects(identity))
+                result = self.runtime.projects.list_projects(identity)
+                scope = self._identity_context()[1]
+                if scope:
+                    result['projects'] = [p for p in result['projects'] if p['id'] == scope]
+                    result['count'] = len(result['projects'])
+                self._send_json(result)
             return
         project_path = self._project_path(path)
         if project_path is not None:
             action, project_id, item_id = project_path
+            if action.startswith('git:'):
+                identity = self._require_project(project_id)
+                if identity is None:
+                    return
+                repo = parse_qs(parsed.query).get('repo_id', [''])[0]
+                graph = RepositoryGraph(self.runtime.store, project_id, repo)
+                if action == 'git:overview':
+                    from .domain import record_to_dict
+                    records, completeness = {}, {}
+                    for kind in ('repository', 'branch', 'observation', 'promotion', 'accepted_promotion', 'transfer'):
+                        values, complete = graph.list(kind)
+                        if kind == 'observation':
+                            latest = {}
+                            for value in values:
+                                key = (value.branch_id, value.data['connector_id'])
+                                if key not in latest or latest[key].created_at < value.created_at:
+                                    latest[key] = value
+                            values = list(latest.values())
+                        records[kind] = [record_to_dict(n) for n in values]
+                        completeness[kind] = complete
+                    self._send_json({'ok': True, **records, 'completeness': completeness})
+                elif action == 'git:watch':
+                    values, complete = graph.list('source')
+                    self._send_json({'ok': True, 'paths': sorted({n.data['path'] for n in values}), 'complete': complete})
+                else:
+                    self._error('NOT_FOUND', 'Unknown Git read operation', HTTPStatus.NOT_FOUND)
+                return
             if action == "project":
                 identity = self._require_project(project_id)
                 if identity is not None:
@@ -360,12 +428,13 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             if action == "agents":
                 identity = self._require_project(project_id)
                 if identity is not None:
-                    self._send_json({"ok": True, "agents": [record.public() for record in self.runtime.auth.agent_records_for(identity) if record.project_id == project_id]})
+                    self._send_json({"ok": True, "agents": [record.public() for record in self.runtime.auth.agent_records_for(identity, project_id)]})
                 return
         if path == "/api/workspace":
-            identity = self._require_identity()
-            if identity is not None:
-                result = self.runtime.workspace.list_memories()
+            selection = self._legacy_project()
+            if selection is not None:
+                identity, project = selection
+                result = self.runtime.workspace.list_memories(project)
                 result["user"] = identity.public()
                 result["agent"] = {
                     "memory_endpoint": "/api/memories",
@@ -375,16 +444,17 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             return
         workspace_path = self._workspace_path(path)
         if workspace_path is not None:
-            identity = self._require_identity()
-            if identity is not None:
+            selection = self._legacy_project()
+            if selection is not None:
+                identity, project = selection
                 if workspace_path[0] == "collection":
-                    self._send_json(self.runtime.workspace.list_memories())
+                    self._send_json(self.runtime.workspace.list_memories(project))
                 else:
-                    result = self.runtime.workspace.get_memory(workspace_path[1])
+                    result = self.runtime.workspace.get_memory(workspace_path[1], project)
                     self._send_json(result, self._status_for_result(result))
             return
         if path == "/api/agents":
-            identity = self._require_identity()
+            identity = self._require_human_identity()
             if identity is not None:
                 self._send_json({"ok": True, "agents": [record.public() for record in self.runtime.auth.agent_records_for(identity)]})
             return
@@ -393,30 +463,7 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             self._send_json(health, HTTPStatus.OK if health.get("ok") else HTTPStatus.SERVICE_UNAVAILABLE)
             return
         if path == "/api/state":
-            gateway = self.runtime.get_gateway()
-            result = gateway.state()
-            recall = gateway.recall_context(SHARED_SCOPE_ID)
-            if recall.get("ok"):
-                result.update(recall)
-                result["state"] = gateway.state().get("state", {})
-                result["backend"] = self.runtime.backend_name
-                memory_versions = recall.get("memory_versions", [])
-                if memory_versions:
-                    result["evidence"] = gateway.inspect_evidence(memory_versions[0].get("id"), max_depth=4)
-                draft_records = [
-                    entry.get("data", {})
-                    for entry in result["state"].get("nodes", [])
-                    if entry.get("type") == "Draft"
-                ]
-                if draft_records:
-                    latest_draft = sorted(draft_records, key=lambda item: item.get("created_at", ""))[-1]
-                    result["draft"] = {"draft": latest_draft, "saved": True}
-                result["integration"] = {
-                    "mcp_server": "python -m hivemind.mcp_server",
-                    "http_api": True,
-                    "backend": self.runtime.backend_name,
-                }
-            self._send_json(result, self._status_for_result(result))
+            self._error('LEGACY_FIXTURE_ONLY', 'Use python -m hivemind.demo for the isolated synthetic fixture', HTTPStatus.GONE)
             return
         if path == "/" or not path.startswith("/api/"):
             if self._serve_static(path):
@@ -424,11 +471,20 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
         self._error("NOT_FOUND", "Endpoint or static file not found", HTTPStatus.NOT_FOUND, {"path": path})
 
     def do_POST(self) -> None:  # noqa: N802 - stdlib handler API
+        try:
+            self._handle_post()
+        except StoreError:
+            self._error('STORAGE_UNAVAILABLE', 'The configured database is unavailable; retry after it recovers', HTTPStatus.SERVICE_UNAVAILABLE)
+
+    def _handle_post(self) -> None:
         parsed = urlparse(self.path)
         if not self._authorized_mutation(parsed.path):
             return
         payload = self._read_json()
         if payload is None:
+            return
+        if parsed.path in {'/api/reset', '/api/recall', '/api/evidence', '/api/exposure', '/api/correction', '/api/draft', '/api/demo'}:
+            self._error('LEGACY_FIXTURE_ONLY', 'Run the isolated fixture with python -m hivemind.demo', HTTPStatus.GONE)
             return
         if parsed.path == "/api/auth/login":
             result = self.runtime.auth.login(payload.get("username"), payload.get("password"))
@@ -453,6 +509,24 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
         project_path = self._project_path(parsed.path)
         if project_path is not None:
             action, project_id, item_id = project_path
+            if action.startswith('git:'):
+                git_action = action[4:]
+                identity = self._require_human_project(project_id, write=True) if git_action == 'accept' else self._require_project(project_id, write=git_action not in {'recall', 'explain'})
+                if identity is None:
+                    return
+                result = self.runtime.git_memory.operation(identity, project_id, git_action, payload, human=git_action == 'accept')
+                self._send_json(result, self._status_for_result(result))
+                return
+            if action == 'agents' and item_id:
+                identity = self._require_human_project(project_id, write=True)
+                if identity is None:
+                    return
+                if self.runtime.projects.role_for(identity, project_id) != 'owner':
+                    self._error('FORBIDDEN', 'Only the project owner can revoke tokens', HTTPStatus.FORBIDDEN)
+                    return
+                revoked = self.runtime.auth.revoke(identity, item_id, project_id)
+                self._send_json({'ok': revoked, 'revoked': revoked})
+                return
             if action == "memories" and item_id is None:
                 identity = self._require_project(project_id, write=True)
                 if identity is None:
@@ -497,11 +571,15 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             )
             return
         if parsed.path == "/api/agents":
-            identity = self._require_identity()
+            project_id = payload.get('project_id')
+            if not isinstance(project_id, str):
+                self._error('PROJECT_REQUIRED', 'Create agent tokens in a selected project')
+                return
+            identity = self._require_human_project(project_id, write=True)
             if identity is None:
                 return
             try:
-                token, record = self.runtime.auth.create_agent_token(identity, payload.get("label"))
+                token, record = self.runtime.auth.create_agent_token(identity, payload.get("label"), project_id)
             except ValueError as exc:
                 self._send_json({"ok": False, "error": {"code": "INVALID_AGENT_LABEL", "message": str(exc)}}, HTTPStatus.BAD_REQUEST)
                 return
@@ -516,41 +594,14 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             )
             return
         if parsed.path == "/api/memories":
-            identity = self._require_identity()
-            if identity is None:
+            selection = self._legacy_project(payload, write=True)
+            if selection is None:
                 return
-            result = self.runtime.workspace.create(identity, payload.get("title"), payload.get("body"), payload.get("tags"))
+            identity, project = selection
+            result = self.runtime.workspace.create(identity, payload.get("title"), payload.get("body"), payload.get("tags"), project)
             self._send_json(result, self._status_for_result(result))
             return
-        gateway = self.runtime.get_gateway()
-        try:
-            if parsed.path == "/api/reset":
-                result = self.runtime.reset()
-            elif parsed.path == "/api/recall":
-                result = gateway.recall_context(payload.get("scope_id"))
-            elif parsed.path == "/api/evidence":
-                result = gateway.inspect_evidence(payload.get("memory_id"), payload.get("max_depth", 4))
-            elif parsed.path == "/api/exposure":
-                result = gateway.record_exposure(payload.get("run_id"), payload.get("memory_id"))
-            elif parsed.path == "/api/correction":
-                result = gateway.apply_correction(
-                    payload.get("base_memory_id"),
-                    payload.get("scope_id"),
-                    correction_text=payload.get("correction_text"),
-                    reviewer=payload.get("reviewer", "operator"),
-                )
-            elif parsed.path == "/api/draft":
-                result = gateway.save_draft(payload.get("scope_id"), payload.get("title"), payload.get("body"), payload.get("citations"))
-            elif parsed.path == "/api/demo":
-                result = gateway.run_demo()
-            else:
-                self._error("NOT_FOUND", "POST endpoint not found", HTTPStatus.NOT_FOUND, {"path": parsed.path})
-                return
-        except Exception as exc:  # the boundary must never dump a traceback to a model client
-            LOGGER.exception("HiveMind request failed: %s", exc)
-            self._error("INTERNAL_ERROR", "Request failed safely", HTTPStatus.INTERNAL_SERVER_ERROR)
-            return
-        self._send_json(result, self._status_for_result(result))
+        self._error('NOT_FOUND', 'POST endpoint not found', HTTPStatus.NOT_FOUND)
 
     def _session_cookie(self) -> str | None:
         for item in self.headers.get("Cookie", "").split(";"):
@@ -584,9 +635,10 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
         if workspace_path is None or workspace_path[0] != "item":
             self._error("NOT_FOUND", "PATCH endpoint not found", HTTPStatus.NOT_FOUND, {"path": parsed.path})
             return
-        identity = self._require_identity()
-        if identity is None:
+        selection = self._legacy_project(write=True)
+        if selection is None:
             return
+        identity, project = selection
         payload = self._read_json()
         if payload is None:
             return
@@ -596,6 +648,7 @@ class HiveMindRequestHandler(BaseHTTPRequestHandler):
             payload.get("title"),
             payload.get("body"),
             payload.get("tags"),
+            project,
         )
         self._send_json(result, self._status_for_result(result))
 
@@ -616,7 +669,10 @@ def serve(host: str = "127.0.0.1", port: int = 8000) -> None:
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point for ``python -m hivemind.api``."""
 
-    parser = argparse.ArgumentParser(description="Run the local HiveMind API")
+    parser = argparse.ArgumentParser(description="Run the local HiveMind API", epilog=
+        "Git memory commands: hivemind connect, run, sync, status, mcp. "
+        "Use 'hivemind connect --help' to connect a repository, or 'hivemind run --help' to launch OpenCode. "
+        "Server: hivemind --host 127.0.0.1 --port 8000. Durable startup: docker compose up -d --wait.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args(argv)

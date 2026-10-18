@@ -6,10 +6,15 @@ entry points are :func:`hivemind.fixture.seed_demo_store` and
 """
 
 from .domain import deterministic_id
-from .demo import run_demo
 from .fixture import seed_demo_store
 from .gateway import HiveMindGateway
 
 __all__ = ["HiveMindGateway", "deterministic_id", "run_demo", "seed_demo_store"]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
+
+
+def run_demo(*args, **kwargs):
+    """Retain the legacy public helper without eagerly importing its CLI module."""
+    from .demo import run_demo as legacy_demo
+    return legacy_demo(*args, **kwargs)

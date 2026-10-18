@@ -30,6 +30,7 @@ NODE_LABELS: Mapping[str, str] = MappingProxyType(
         "WorkspaceMemory": "WorkspaceMemory",
         "WorkspaceProject": "WorkspaceProject",
         "ProjectMember": "ProjectMember",
+        "GitRecord": "GitRecord",
     }
 )
 
@@ -50,6 +51,8 @@ EDGE_TYPES: tuple[str, ...] = (
     "SUPERSEDES",
     "CREATED_DRAFT",
     "CITES_VERSION",
+    "PARENT", "BRANCH_MEMORY", "PUBLISHES", "SUPPORTED_BY", "HAS_SOURCE",
+    "OBSERVED", "AT_COMMIT", "REVISES", "ACCEPTS", "TRANSFERRED_FROM",
 )
 
 
@@ -68,17 +71,9 @@ ON CREATE SET n.tenant_id = $tenant_id,
   n.company_id = $company_id,
   n.memory_version_id = $memory_version_id,
   n.reviewed_target_id = $reviewed_target_id,
-  n.created_at = $created_at
-ON MATCH SET n.tenant_id = $tenant_id,
-  n.project_id = $project_id,
-  n.node_type = '{label}',
-  n.scope_id = $scope_id,
-  n.status = $status,
-  n.kind = $kind,
-  n.company_id = $company_id,
-  n.memory_version_id = $memory_version_id,
-  n.reviewed_target_id = $reviewed_target_id,
-  n.created_at = $created_at
+  n.created_at = $created_at,
+  n.workspace_project_id = $workspace_project_id, n.repo_id = $repo_id,
+  n.branch_id = $branch_id, n.key = $key, n.head = $head
 RETURN n.id AS id, n.node_type AS node_type, n.tenant_id AS tenant_id,
   n.project_id AS project_id, n.data_json AS data_json
 """.strip()
@@ -238,6 +233,8 @@ _registry: dict[str, str] = {
 }
 for _node_label in NODE_LABELS.values():
     _registry[f"node_upsert_{_node_label}"] = _node_upsert_query(_node_label)
+from .git_queries import GIT_QUERIES
+_registry.update(GIT_QUERIES)
 for _edge_type in EDGE_TYPES:
     _registry[f"edge_upsert_{_edge_type}"] = _edge_upsert_query(_edge_type)
 

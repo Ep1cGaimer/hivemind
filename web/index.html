@@ -63,6 +63,14 @@
             <div class="project-actions"><button id="people-button" class="button button-secondary" type="button">People</button><button id="agent-button" class="button button-secondary" type="button">Connect agent</button><button id="new-memory-button" class="button button-primary" type="button">Add memory <span aria-hidden="true">+</span></button></div>
           </div>
 
+          <section class="git-memory-panel" aria-labelledby="git-memory-title">
+            <div class="panel-heading"><div><p class="eyebrow">Context that follows Git</p><h2 id="git-memory-title">Team memory</h2></div><button id="refresh-git" class="button button-secondary" type="button">Refresh</button></div>
+            <div class="git-selectors"><label>Repository<select id="git-repository" aria-label="Repository"></select></label><label>Branch and checkout<select id="git-context" aria-label="Branch and checkout"></select></label></div>
+            <p id="git-context-status" class="form-help" role="status"></p>
+            <div id="git-findings" class="git-findings" aria-live="polite"></div>
+            <details id="git-inspect" hidden><summary>Why this memory appears here</summary><pre id="git-explanation"></pre></details>
+          </section>
+          <details class="legacy-notes"><summary>Legacy project notes and connections</summary>
           <div class="project-layout">
             <section class="graph-panel" aria-labelledby="graph-title">
               <div class="panel-heading"><div><p class="eyebrow">Connections</p><h2 id="graph-title">Project memory</h2></div><div class="graph-controls"><button id="fit-graph-button" class="icon-button" type="button" title="Reset view" aria-label="Reset view">Fit</button><button id="zoom-out-button" class="icon-button" type="button" title="Zoom out" aria-label="Zoom out">−</button><button id="zoom-in-button" class="icon-button" type="button" title="Zoom in" aria-label="Zoom in">+</button></div></div>
@@ -89,6 +97,7 @@
             </aside>
           </div>
 
+          </details>
           <section id="people-panel" class="drawer-panel" hidden aria-labelledby="people-title">
             <div class="drawer-heading"><div><p class="eyebrow">Project access</p><h2 id="people-title">People</h2></div><button class="button button-quiet" type="button" data-close-panel="people-panel">Close</button></div>
             <div id="member-list" class="member-list"></div>
@@ -98,7 +107,7 @@
           <section id="agent-panel" class="drawer-panel" hidden aria-labelledby="agent-title">
             <div class="drawer-heading"><div><p class="eyebrow">Project connection</p><h2 id="agent-title">Connect a coding agent</h2></div><button class="button button-quiet" type="button" data-close-panel="agent-panel">Close</button></div>
             <form id="agent-form" class="member-form"><label for="agent-label">Agent name</label><div class="member-form-row"><input id="agent-label" placeholder="Claude Code, Codex, Cursor" required /><button class="button button-primary" type="submit">Create token</button></div></form>
-            <div id="agent-result" class="agent-result" hidden><span class="quiet-label">Copy once</span><div class="token-row"><code id="agent-token"></code><button id="copy-token-button" class="button button-secondary" type="button">Copy</button></div><p class="form-help">Use this project-scoped token with HTTP or <code>HIVEMIND_AGENT_TOKEN</code> for MCP.</p></div>
+            <div id="agent-result" class="agent-result" hidden><span class="quiet-label">Copy once</span><div class="token-row"><code id="agent-token"></code><button id="copy-token-button" class="button button-secondary" type="button">Copy</button></div><p class="form-help">Set <code>HIVEMIND_AGENT_TOKEN</code> locally, then connect your checkout:</p><pre id="git-connect-command"></pre><p class="form-help">Review the installed native hooks in each client. To share unfinished work, join the recorded branch ID shown in the branch selector using <code>--branch-id</code>.</p></div>
           </section>
         </section>
       </main>

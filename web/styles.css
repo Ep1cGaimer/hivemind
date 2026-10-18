@@ -90,3 +90,17 @@ input:hover, textarea:hover, select:hover { border-color: var(--accent); } input
   .app-shell { width: min(100% - 28px, var(--max-width)); }.topbar { min-height: 62px; }.user-name { display: none; }.auth-view { padding-top: 54px; }.auth-view h1 { font-size: clamp(38px, 12vw, 54px); }.page-heading { align-items: start; flex-direction: column; padding-top: 50px; }.page-heading .button { width: 100%; }.inline-form { grid-template-columns: 1fr; }.inline-form-actions { justify-content: flex-end; }.project-row { grid-template-columns: minmax(0, 1fr) 22px; gap: 10px; padding: 15px 4px; }.project-row-meta { grid-column: 1 / -1; gap: 12px; }.project-row-arrow { grid-column: 2; grid-row: 1; }.project-actions .button { flex: 1; }.project-sidebar { grid-template-columns: 1fr; }.graph-panel { padding: 13px; }.memory-graph { height: 380px; }.member-form-row { align-items: stretch; flex-wrap: wrap; }.member-form-row input { flex-basis: 100%; }.member-form-row select, .member-form-row .button { flex: 1; }.toast { right: 14px; bottom: 14px; left: 14px; max-width: none; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+/* Git context is the primary workspace; legacy notes stay available below it. */
+.git-memory-panel { margin: 1.5rem 0; padding: 1.5rem; border: 1px solid var(--border, #d8ded7); border-radius: 12px; background: var(--surface, #fff); }
+.git-selectors { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+.git-selectors label { flex: 1; min-width: 220px; }
+.git-selectors select { display: block; width: 100%; margin-top: .4rem; }
+.git-findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1.3rem; }
+.git-collection h3 { margin: 1rem 0; font-size: 1rem; }
+.git-memory { border-top: 1px solid #d8ded7; padding: 1rem 0; }
+.git-memory p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; }
+.git-memory small { color: #59645b; }
+.git-state { display: block; font-size: .75rem; color: #37614d; margin: .4rem 0; }
+.git-state:not([data-applicability="applicable"]), .git-warning { color: #8e5a12; }
+.git-memory-panel pre, #git-connect-command { overflow-x: auto; max-height: 420px; padding: 1rem; background: #f2f4f0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.legacy-notes > summary { cursor: pointer; padding: 1rem 0; }

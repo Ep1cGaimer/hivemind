@@ -9,7 +9,7 @@ from hivemind.auth import AuthManager
 from hivemind.fixture import seed_demo_store
 from hivemind.gateway import HiveMindGateway
 from hivemind.mcp_server import MCPServer
-from hivemind.workspace import MemoryWorkspace
+from hivemind.workspace import MemoryWorkspace, ProjectWorkspace
 
 
 class WorkspaceTests(unittest.TestCase):
@@ -21,6 +21,8 @@ class WorkspaceTests(unittest.TestCase):
             }
         )
         self.server = HiveMindHTTPServer(("127.0.0.1", 0), runtime=runtime)
+        owner = runtime.auth.login('operator', 'secret')[1]
+        self.project_id = runtime.projects.create_project(owner, 'Workspace test')['project']['id']
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
         self.base = f"http://127.0.0.1:{self.server.server_port}"
@@ -36,7 +38,7 @@ class WorkspaceTests(unittest.TestCase):
             self.base + path,
             data=body,
             method=method,
-            headers={"Content-Type": "application/json", **(headers or {})},
+            headers={"Content-Type": "application/json", 'X-HiveMind-Project': self.project_id, **(headers or {})},
         )
         with urlopen(request, timeout=5) as response:
             return response.status, json.loads(response.read()), dict(response.headers)
@@ -87,7 +89,7 @@ class WorkspaceTests(unittest.TestCase):
         status, token_payload, _ = self.request(
             "/api/agents",
             method="POST",
-            payload={"label": "Test coding agent"},
+            payload={"label": "Test coding agent", 'project_id': self.project_id},
             headers={"Cookie": cookie},
         )
         self.assertEqual(status, 200)
@@ -105,8 +107,9 @@ class WorkspaceTests(unittest.TestCase):
         auth = AuthManager({"HIVEMIND_OPERATOR_PASSWORD": "secret"})
         login = auth.login("operator", "secret")
         self.assertIsNotNone(login)
-        token, _ = auth.create_agent_token(login[1], "unit test agent")
         gateway = HiveMindGateway(seed_demo_store())
+        project = ProjectWorkspace(gateway.store, auth).create_project(login[1], 'MCP test')['project']['id']
+        token, _ = auth.create_agent_token(login[1], 'unit test agent', project)
 
         unauthenticated = MCPServer(gateway=gateway)
         denied = unauthenticated.dispatch(

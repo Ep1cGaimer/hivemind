@@ -16,6 +16,14 @@ from .gateway import HiveMindGateway
 from .fixture import seed_demo_store
 
 
+def main():
+    """Run the isolated historical regression without shared-service routes."""
+    import json
+    result = run_cold_agent_walkthrough(HiveMindGateway(seed_demo_store()))
+    print(json.dumps(result, indent=2))
+    return 0 if result.get('ok') else 1
+
+
 def _failed(result: Any) -> bool:
     return not isinstance(result, dict) or result.get("ok") is not True
 
@@ -290,3 +298,7 @@ def run_demo() -> dict[str, Any]:
         "evidence": gateway.inspect_evidence(correction_id, max_depth=4),
         "state_counts": gateway.store.snapshot()["counts"],
     }
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

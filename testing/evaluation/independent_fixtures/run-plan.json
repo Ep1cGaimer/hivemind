@@ -1,0 +1,726 @@
+{
+  "seed": 1729,
+  "design": "8 distinct tasks x 3 conditions x 3 repeats; 72 consumer runs; additional applicability variants reported separately",
+  "runs": [
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "1dcb697a-ff3c-4c15-bcfc-94973a8a651c",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "0ea1830f-42a3-448b-b8ac-b7510d250cd5",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "8310cf47-5f92-4634-aa3a-8565bb6a7a87",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "6051ce20-12d9-420c-9fc7-2879c5bd8807",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "f18d52d6-c9a5-4a6f-afcc-969d70df4c2a",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "fea6884a-fd50-4007-ae20-195f7cc2610a",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "7a42820d-3ab7-46ab-9762-0b92f75ac253",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "e26b82ab-9cd5-44cb-990a-ed24d6ba59d1",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "2f54bd8f-86b3-4c39-ac39-d82414a78777",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "91a75b47-d356-4488-9ead-ef502860a319",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "ec03b4d2-bdca-4eb1-b758-5c8205f60182",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "33c404bc-414d-4c41-9c89-22a0464c120e",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "588e1cad-5310-4aa7-9f0c-a7dfc9e0c7e7",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "6386e052-6c8a-4f38-9ec5-d695177dceb9",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "720c8721-eff4-464a-998d-29021c198c1c",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "b676e310-f88f-454c-af08-1932fb2e48c8",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "54901f0a-c99e-47a4-9605-835e38fc0f2b",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "6e279b20-0620-4e6b-ae08-d1f56c371330",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "fa94b931-4e01-4b49-b910-381815aa6e6d",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "e39cff73-eb5c-4faa-8dd6-3e2742a3187f",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "ef7e10f6-ac52-4a1f-9254-5ec161733221",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "a2a00906-4d94-4a29-bf9e-6f296a46ac39",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "661de4fb-4230-4e57-9ed0-711ae59f0178",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "5dba228d-9ee8-4e96-b3ca-0b1219f22292",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "d9f51dc6-d8dc-403c-b2d2-443d0d9475f3",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "c6007486-7c9b-4d02-8a66-8ef0b0bc5575",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "562d3077-509b-4c42-93ce-cf88fb50c591",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "cf0f2761-6fdf-4bc4-9960-68d570840ee6",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "82ff4f9c-8370-418d-b15c-39b8fc1837d4",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "8bfaae00-1a62-42fc-b0c9-05b5fc223086",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "a6a776a5-0214-420e-a2a1-bb73f8889c93",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "a66cca72-1028-488c-b216-7a6ed43f7165",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "4c51ada2-505e-4d37-a07a-c736dcc10ba5",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "a73ffd61-129c-4b82-a2d1-daf2b60a5b9c",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "a21cd54e-2316-4d69-9fa2-47822b93950c",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "5b523cc9-ba7d-421b-a044-8de3b2affd72",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "752454c3-e820-48fd-a2e2-26c376e64d86",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "8037bf78-78f5-4a2b-9b98-821d49ddb825",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "4e36b673-3553-40a7-b140-cd110947733e",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "990b5b18-529b-437d-8a39-6ff1260ea4d1",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "87895457-cfb5-4fd7-96c9-0a7b714107f7",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "323f529e-2ea9-419f-8b7c-c892d8787ba2",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "1dad48b3-b5d0-4c09-8528-0333feb3061d",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "acb12740-dd88-4be9-8e81-cab16c1124fb",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "f5f322a3-0d85-4a4b-b215-5225af865bcf",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "59c70d38-5408-4360-a258-486b640b541c",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "ce32b848-768f-4ed9-9ec0-aea23d4a88e3",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "ef66303e-0b03-4731-9340-c3ca6e410614",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "0aa741cc-911b-4158-981c-d5e5643c1de5",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "19edb99e-26cd-4ab8-be65-e7b8b1d61472",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "source_only",
+      "repetition": 2,
+      "session_id": "b9fca07a-68fa-49b4-baf7-f47a6743dc98",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "failed_approach",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "d478694c-94ef-472d-99bf-0ca5c0faedbe",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "ddd0e239-1158-4de5-a692-cf87b061c583",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "hivemind",
+      "repetition": 2,
+      "session_id": "4b2aed12-3435-46a3-a945-941659e487f2",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "8f660fbc-1b99-491f-ba28-9bf17dbae963",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "e3dbf8e4-1d83-49df-a3e7-54d2fafca7cb",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "306074f0-2240-483b-9d2c-c6ee1a8c426e",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "source_only",
+      "repetition": 3,
+      "session_id": "db529c1c-5217-43a6-8e9a-ffa562ab77c4",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "5439365a-defe-4f87-8c01-123f504517b5",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "2348b305-c0ac-4eb2-a9b4-42cf1723bca5",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "integration_applicability",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "688b6264-84a1-4b2e-aff1-a1e7064a51cb",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "hivemind",
+      "repetition": 3,
+      "session_id": "fc0596a6-2a2d-44e3-b9f3-115465d8d374",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "4deac57e-29e4-44af-b86e-d6c386c7d4d7",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "aa0977dd-e803-448a-8b4a-e4cb25fc1ae4",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "stale_guidance",
+      "condition": "source_linked_notes",
+      "repetition": 2,
+      "session_id": "5c4fd46c-4175-4e2d-9c1b-375cdd289d66",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "ec76bd37-c4e6-4b42-ba1b-c9129a381443",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "branch_constraint",
+      "condition": "source_linked_notes",
+      "repetition": 1,
+      "session_id": "47a2617b-2db2-4612-acee-d2ea2b57407f",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "no_history",
+      "condition": "source_only",
+      "repetition": 1,
+      "session_id": "b6f047ba-71fc-44c6-a458-232a808d77a4",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "unfinished_checkpoint",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "0485a3b7-cd3b-40e3-a0f0-bac2e74eea49",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "conflicting_interpretations",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "d2889757-8f4e-4676-b863-e8f66a4b8e80",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "source_linked_notes",
+      "repetition": 3,
+      "session_id": "a650d358-f475-4ac2-bcad-d4ea8c0dbe59",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    },
+    {
+      "case": "build_prerequisite",
+      "condition": "hivemind",
+      "repetition": 1,
+      "session_id": "798be83a-f06e-438c-9bf3-873b34090f96",
+      "workspace": "must allocate fresh prepare destination",
+      "status": "untested",
+      "model": "record identical OpenCode Zen model identifier before execution",
+      "budget": "predeclare same task-level token/tool/time caps across all conditions"
+    }
+  ]
+}

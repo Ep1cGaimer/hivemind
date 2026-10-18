@@ -17,3 +17,9 @@ Use the current product documents in the workspace root instead:
 
 Do not treat archived paper exercises as runtime evidence. The archive contains no
 measured retention result, benchmark, demand validation, or approval to build.
+
+
+The pre-Git workspace README, capability brief, and evidence graph contract are
+preserved as `legacy-workspace-readme.md`, `legacy-capability-brief.md`, and
+`legacy-evidence-graph-contract.md`. They describe the separate historical
+Juniper fixture. Current product rules live in the root Git-aware brief/contract.

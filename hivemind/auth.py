@@ -19,6 +19,8 @@ import os
 import secrets
 import threading
 from typing import Any, Mapping
+from .domain import GitRecord
+from .store import ImmutableConflictError
 
 
 DEFAULT_AUTH_SECRET = "local-hivemind-secret-change-me"
@@ -60,13 +62,50 @@ class AuthManager:
     SESSION_COOKIE = "hivemind_session"
     AUTH_HEADER = "Authorization"
 
-    def __init__(self, environ: Mapping[str, str] | None = None) -> None:
+    def __init__(self, environ: Mapping[str, str] | None = None, store: Any = None) -> None:
         source = os.environ if environ is None else environ
-        self.secret = (source.get("HIVEMIND_AUTH_SECRET") or DEFAULT_AUTH_SECRET).encode("utf-8")
+        self.store = store
+        configured_secret = source.get('HIVEMIND_AUTH_SECRET')
+        if not configured_secret or configured_secret == DEFAULT_AUTH_SECRET:
+            key = 'auth:signing-secret'
+            prior = store.get_node(key) if store is not None else None
+            configured_secret = prior.data['secret'] if isinstance(prior, GitRecord) else secrets.token_urlsafe(48)
+            if store is not None and prior is None:
+                try:
+                    store.add_node(GitRecord(key, store.tenant_id, store.project_id, '', '', 'signing_secret', key,
+                        '', '', '', '', '', self._now(), {'secret': configured_secret}))
+                except ImmutableConflictError:
+                    winner = store.get_node(key)
+                    if not isinstance(winner, GitRecord) or winner.kind != 'signing_secret':
+                        raise
+                    configured_secret = winner.data['secret']
+        self.secret = configured_secret.encode('utf-8')
         self._users = self._load_users(source)
         self._sessions: dict[str, Identity] = {}
         self._agent_tokens: dict[str, AgentTokenRecord] = {}
+        self._revoked: set[str] = set()
         self._lock = threading.RLock()
+
+    def _persist(self, key: str, kind: str, data: dict, project: str = '') -> None:
+        if self.store is not None:
+            old = self.store.get_node(key)
+            self.store.add_node(GitRecord(key, self.store.tenant_id, self.store.project_id,
+                project, '', kind, key, '', '', '', '', '', old.created_at if old else self._now(), data))
+
+    def revoke(self, identity: Identity, token_id: str, project_id: str) -> bool:
+        record = self._token_record(token_id)
+        if not record or record.project_id != project_id:
+            return False
+        self._persist('auth:revoked:' + token_id, 'revoked_token', {'token_id': token_id}, project_id)
+        with self._lock:
+            self._revoked.add(token_id)
+        return True
+
+    def _token_record(self, token_id: str) -> AgentTokenRecord | None:
+        if self.store is not None:
+            n = self.store.get_node('auth:token:' + token_id)
+            return AgentTokenRecord(**n.data) if isinstance(n, GitRecord) and n.kind == 'agent_token' else None
+        return self._agent_tokens.get(token_id)
 
     @staticmethod
     def _load_users(source: Mapping[str, str]) -> dict[str, tuple[str, Identity]]:
@@ -152,6 +191,7 @@ class AuthManager:
         record = AgentTokenRecord(token_id, identity.user_id, clean_label, self._now(), token[:18] + "…", project_id)
         with self._lock:
             self._agent_tokens[token_id] = record
+        self._persist('auth:token:' + token_id, 'agent_token', record.public(), project_id or '')
         return token, record
 
     def authenticate_agent_token(self, token: Any) -> Identity | None:
@@ -172,6 +212,14 @@ class AuthManager:
         if decoded is None:
             return None
         user_id = decoded.get("user_id")
+        token_id = decoded.get('token_id')
+        if not isinstance(token_id, str) or token_id in self._revoked:
+            return None
+        if self.store is not None and self.store.get_node('auth:revoked:' + token_id) is not None:
+            return None
+        record = self._token_record(token_id)
+        if record is None or record.user_id != user_id or not record.project_id or record.project_id != decoded.get('project_id'):
+            return None
         entry = self._users.get(user_id) if isinstance(user_id, str) else None
         return (entry[1], decoded.get("project_id") if isinstance(decoded.get("project_id"), str) else None) if entry else None
 
@@ -199,6 +247,12 @@ class AuthManager:
             identity = self._sessions.get(session) if session else None
         return (identity, None) if identity else None
 
-    def agent_records_for(self, identity: Identity) -> list[AgentTokenRecord]:
+    def agent_records_for(self, identity: Identity, project_id: str | None = None) -> list[AgentTokenRecord]:
         with self._lock:
-            return [record for record in self._agent_tokens.values() if record.user_id == identity.user_id]
+            if self.store is not None:
+                from .git_graph import RepositoryGraph
+                nodes, _ = RepositoryGraph(self.store, project_id or '', '').list('agent_token')
+                records = [AgentTokenRecord(**n.data) for n in nodes]
+            else:
+                records = list(self._agent_tokens.values())
+            return [record for record in records if record.user_id == identity.user_id]

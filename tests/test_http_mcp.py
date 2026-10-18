@@ -45,37 +45,35 @@ class HttpAndMcpTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(health["backend"], "memory")
 
-        status, state = self.request("/api/state")
-        self.assertEqual(status, 200)
-        self.assertTrue(state["ok"])
-        self.assertEqual(state["backend"], "memory")
-        self.assertEqual(state["state"]["backend"], "memory")
-        self.assertEqual(state["integration"]["backend"], "memory")
+        with self.assertRaises(HTTPError) as context:
+            self.request('/api/state')
+        self.assertEqual(context.exception.code, 410)
 
     def test_state_and_demo_expose_real_evidence_and_cold_receipt(self):
-        status, state = self.request("/api/state")
-        self.assertEqual(status, 200)
-        self.assertTrue(state["ok"])
-        self.assertTrue(state["memory_versions"])
-        self.assertTrue(state["evidence"]["path"])
+        gateway = self.server.runtime.gateway
+        recalled = gateway.recall_context(SHARED_SCOPE_ID)
+        self.assertTrue(recalled['memory_versions'])
+        evidence = gateway.inspect_evidence(BASE_MEMORY_ID)
+        self.assertTrue(evidence['path'])
         self.assertEqual(
-            [node["kind"] for node in state["evidence"]["path"]],
+            [node["kind"] for node in evidence['path']],
             ["MemoryVersion", "Claim", "SupportProposal", "SourcePassage"],
         )
 
-        status, demo = self.request("/api/demo", method="POST", payload={})
-        self.assertEqual(status, 200)
+        demo = gateway.run_demo()
         self.assertTrue(demo["ok"])
         self.assertEqual(demo["steps"][-1]["step"], "scope_isolation_check")
         self.assertTrue(demo["assertions"]["correction_recalled_after_cold_restart"])
-        status, after = self.request("/api/state")
-        self.assertEqual(status, 200)
-        self.assertTrue(after.get("draft", {}).get("draft"))
+        self.assertTrue(demo.get('draft', {}).get('draft'))
+        with self.assertRaises(HTTPError) as context:
+            self.request('/api/demo', method='POST', payload={})
+        self.assertEqual(context.exception.code, 410)
 
     def test_mutations_require_optional_api_key(self):
         with patch.dict(os.environ, {"HIVEMIND_API_KEY": "local-test-key"}):
-            status, _ = self.request("/api/reset", method="POST", payload={}, headers={"X-HiveMind-Key": "local-test-key"})
-            self.assertEqual(status, 200)
+            with self.assertRaises(HTTPError) as context:
+                self.request('/api/reset', method='POST', payload={}, headers={'X-HiveMind-Key': 'local-test-key'})
+            self.assertEqual(context.exception.code, 410)
             with self.assertRaises(HTTPError) as context:
                 self.request("/api/reset", method="POST", payload={})
             self.assertEqual(context.exception.code, 401)
@@ -98,10 +96,9 @@ class HttpAndMcpTests(unittest.TestCase):
                 "params": {"name": "recall_context", "arguments": {"scope_id": SHARED_SCOPE_ID}},
             }
         )
-        self.assertFalse(recalled["result"]["isError"])
+        self.assertTrue(recalled["result"]["isError"])
         structured = recalled["result"]["structuredContent"]
-        self.assertTrue(structured["ok"])
-        self.assertTrue(structured["support_paths"])
+        self.assertEqual(structured['error']['code'], 'AUTH_REQUIRED')
 
 
 if __name__ == "__main__":

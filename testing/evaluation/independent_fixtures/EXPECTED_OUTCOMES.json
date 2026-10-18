@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "status": "predeclared; no model evaluation has occurred",
+  "independence": "Defined from goal.md H1-H10 and J before reading implementation or observing tested model output.",
+  "cases": {
+    "failed_approach": {
+      "history_required": "A real writer reproduces the seeded LIKE lookup failure for IDs containing SQL wildcard characters, repairs the lookup, and runs a validation command.",
+      "consumer_outcome": "cart.total returns exact-ID Decimal totals for wildcard and ordinary SKUs; absent IDs raise KeyError; SQL injection does not select another item.",
+      "benefit_measure": "Compare repeated lookup investigation and tool/model usage while maintaining all functional checks. A correct final result alone does not prove history helped."
+    },
+    "build_prerequisite": {
+      "history_required": "A real writer encounters the missing generated schema in a fresh checkout, discovers and executes tools/build.py, then repairs the decoder.",
+      "consumer_outcome": "Fresh consumer builds its own schema and encoder emits schema-ordered typed JSON; generated artifact must exist before checker runs and writer-repaired decoder must complete a typed round-trip.",
+      "benefit_measure": "Count failed imports, repeated build discovery, successful generation and elapsed tool time."
+    },
+    "branch_constraint": {
+      "history_required": "A real writer works on partner-unicode; the default branch requires ASCII while partner-unicode preserves Unicode.",
+      "consumer_outcome": "routes.path_for honors the current branch's explicit slug policy, including Unicode, repeated separators, and case folding.",
+      "benefit_measure": "Measure correct branch-specific behavior and inappropriate guidance on the main variant."
+    },
+    "unfinished_checkpoint": {
+      "history_required": "Interrupt a real writer only after a meaningful incomplete code edit; retain that exact snapshot and actual run evidence. If writer finished, this fixture is invalid as an unfinished handoff.",
+      "consumer_outcome": "reconcile.run reads both CSV inputs, validates duplicate IDs and malformed quantities, returns sorted stock deltas and CLI prints the same JSON.",
+      "benefit_measure": "Compare resumed investigation, duplicate work and completeness; inspect actual checkpoint separately from durable findings."
+    },
+    "stale_guidance": {
+      "history_required": "Writer observes half-up rounding; advance makes a new source commit requiring half-even rounding after writer work is frozen.",
+      "consumer_outcome": "invoice.total rounds each line under current policy before summing and returns two-decimal strings. Half-even ties distinguish stale half-up advice.",
+      "benefit_measure": "Count uses of obsolete rounding and verify historical evidence remains inspectable but qualified."
+    },
+    "conflicting_interpretations": {
+      "history_required": "Two independent real writer sessions inspect contradictory customer and finance guides; any resulting findings retain both source identities. Contradiction must not be resolved by timestamp.",
+      "consumer_outcome": "quotes.quote follows runtime tax_mode for both inclusive and exclusive settings. DECISION.md names both conflicting guides and the runtime authority.",
+      "benefit_measure": "Inspect whether both interpretations were considered and source authority resolved the conflict; the checker measures behavior and referenced documents, not quality of reasoning."
+    },
+    "integration_applicability": {
+      "history_required": "Real writer on transport-v2 discovers packet digest depends on exact serialized bytes. Consumer main excludes that guidance before merge; verified no-ff merge makes v2 applicable afterward.",
+      "consumer_outcome": "packets.packet returns current transport wire bytes as hex and matching SHA256; main-before is v1 and main-after is v2, with a real merge in Git history.",
+      "benefit_measure": "Compare before/after context, final packet behavior, and actual inheritance explanation. Final artifacts alone cannot establish a database path."
+    },
+    "no_history": {
+      "history_required": "None. Skip writer and provide empty historical context to all conditions.",
+      "consumer_outcome": "stats.histogram counts signed integers with integer keys without modifying input, including empty input.",
+      "benefit_measure": "Compare correctness and overhead without historical guidance; any irrelevant capture or recall requires disclosure."
+    }
+  }
+}

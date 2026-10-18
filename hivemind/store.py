@@ -348,7 +348,8 @@ class FalkorDBStore:
             client_type = getattr(module, "FalkorDB", None)
             if client_type is None:
                 raise FalkorDBUnavailableError("Installed falkordb client does not expose FalkorDB")
-            kwargs: dict[str, Any] = {"host": self.host, "port": self.port}
+            kwargs: dict[str, Any] = {"host": self.host, "port": self.port,
+                                      "socket_connect_timeout": 2, "socket_timeout": 5}
             if self.username is not None:
                 kwargs["username"] = self.username
             if self.password is not None:
@@ -402,7 +403,7 @@ class FalkorDBStore:
             bound_params[binding] = getattr(self, binding)
         for bounded_key, maximum in (
             ("max_depth", 4),
-            ("limit", 8),
+            ("limit", 1025 if query_name.startswith('git_') else 8),
             ("max_items", 64),
             ("memory_limit", 8),
             ("path_limit", 8),
@@ -427,14 +428,10 @@ class FalkorDBStore:
         if not callable(query_method):
             raise FalkorDBUnavailableError("Selected FalkorDB graph does not expose query")
         try:
-            return query_method(query, bound_params)
-        except TypeError:
-            # Compatibility with injected clients that expose keyword params;
-            # both branches still execute only the trusted template above.
-            try:
-                return query_method(query, params=bound_params)
-            except Exception as exc:
-                raise FalkorDBUnavailableError(f"Fixed FalkorDB query failed: {exc}") from exc
+            # The pinned official SDK supports a server-side millisecond timeout.
+            # Do not silently retry without it: bounded path depth can still
+            # produce expensive traversal in a merge-heavy commit DAG.
+            return query_method(query, params=bound_params, timeout=2000)
         except Exception as exc:
             raise FalkorDBUnavailableError(f"Fixed FalkorDB query failed: {exc}") from exc
 
@@ -546,6 +543,11 @@ class FalkorDBStore:
             "memory_version_id": text("memory_version_id"),
             "reviewed_target_id": text("reviewed_target_id"),
             "created_at": text("created_at"),
+            "workspace_project_id": text("workspace_project_id"),
+            "repo_id": text("repo_id"),
+            "branch_id": text("branch_id"),
+            "key": text("key"),
+            "head": text("head"),
         }
 
     def add_node(self, record: Any) -> Any:

@@ -1,3 +1,7 @@
+> Current direction: Git-aware team coding-assistant memory. This memo is the
+> historical Juniper capability-planning decision record. Current implementation,
+> comparison and pending acceptance are in `testing/git_memory/RESULTS.md`.
+
 # Additional concept decision memo — HiveMind
 
 Date: 2026-10-15. Chair's conditional recommendation, not a declaration of consensus or build authorization. This memo evaluates HiveMind as a Track 2 + 3 company-agent memory tool.

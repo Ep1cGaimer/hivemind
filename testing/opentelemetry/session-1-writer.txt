@@ -1,0 +1,19 @@
+We are testing HiveMind on this real checkout of opentelemetry.io.
+Read AGENTS.md and relevant contributor/site tooling instructions first.
+Call HiveMind list_memories to see the bootstrap notes, then verify relevant claims
+against the current checkout. Ignore the infrastructure persistence-probe memory.
+
+Investigate how a contributor should install dependencies and choose the right
+build/check commands for a small English documentation edit. Pay attention to
+install:safe, optional dependencies, default versus production build behavior,
+and whether tests can skip without a generated site.
+
+Use create_memory to save a note titled "Writer handoff: contributor setup and validation".
+Include exact source paths and line references, checkout commit, conditions and
+uncertainties, and a short proposed improvement to the existing contributor setup
+page. Separate things observed in files from commands you actually ran.
+Use the site tooling container otel-site-trial for Linux commands:
+docker exec otel-site-trial npm exec --no -- prettier --check content/en/docs/contributing/development.md
+
+Do not modify documentation yet. Do not publish, push, or open a PR.
+Finish by reporting the saved memory ID and the evidence you checked.

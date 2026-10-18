@@ -1,3 +1,22 @@
+# Git-aware acceptance
+
+`test_git_memory.py` creates an independent real Git repository; it tests
+same-commit branch isolation, WIP, forward/normal integration, scoped revisions,
+conflicts, checkpoints, deterministic rebase/squash mappings, ambiguous mappings,
+ref recreation, actual shallow clone deepening, privacy and context budgets.
+`test_git_bridge_http.py` verifies the HTTP/MCP bridge, token revocation, project
+and viewer restrictions, cold cross-client transport and offline retry bindings.
+`test_git_live.py` repeats the Git contract against pinned FalkorDB and tests
+restart durability and relationship ablation. These deterministic tests do not
+replace the separate OpenCode/Zen native proof in `testing/git_memory/ACCEPTANCE.md`;
+they also do not prove Codex/Claude hook trust or lifecycle behavior.
+
+Use `python -m unittest discover -s tests -q`. Live tests require
+`HIVEMIND_LIVE_TESTS=1` and explicit isolated `FALKORDB_HOST`, `FALKORDB_PORT`,
+`FALKORDB_GRAPH`, then `python -m unittest discover -s tests -p '*live.py' -q`.
+The legacy live suite resets its configured graph. See
+[the current proof report](../testing/git_memory/RESULTS.md).
+
 # HiveMind behavior tests
 
 The offline tests use only the Python standard library and exercise the public

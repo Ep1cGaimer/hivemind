@@ -11,12 +11,12 @@ from typing import Any, TextIO
 from .auth import AuthManager, Identity
 from .backend import BackendSelectionError, create_store
 from .gateway import HiveMindGateway
-from .workspace import MemoryWorkspace
+from .workspace import MemoryWorkspace, ProjectWorkspace
 
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "hivemind"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = "0.2.0"
 MAX_LINE_BYTES = 1_000_000
 
 
@@ -42,9 +42,11 @@ class MCPServer:
         agent_token: str | None = None,
     ) -> None:
         self.gateway = gateway if gateway is not None else HiveMindGateway(create_store())
-        self.auth = auth or AuthManager()
+        self.auth = auth or AuthManager(store=self.gateway.store)
         self.workspace = MemoryWorkspace(self.gateway.store)
-        token_context = self.auth.authenticate_agent_context(agent_token or os.environ.get("HIVEMIND_AGENT_TOKEN"))
+        self.agent_token = agent_token or os.environ.get('HIVEMIND_AGENT_TOKEN')
+        self.projects = ProjectWorkspace(self.gateway.store, self.auth)
+        token_context = self.auth.authenticate_agent_context(self.agent_token)
         self.identity = token_context[0] if token_context else None
         self.project_id = token_context[1] if token_context else None
 
@@ -111,38 +113,31 @@ class MCPServer:
             return {"ok": False, "error": {"code": "UNKNOWN_TOOL", "message": "Tool is not in the fixed HiveMind tool registry"}}
         if not isinstance(arguments, dict):
             return {"ok": False, "error": {"code": "INVALID_ARGUMENTS", "message": "tools/call arguments must be a JSON object"}}
-        if name == "recall_context":
-            return self.gateway.recall_context(arguments.get("scope_id"))
-        if name == "inspect_evidence":
-            return self.gateway.inspect_evidence(arguments.get("memory_id"), arguments.get("max_depth", 4))
-        if name == "apply_correction":
-            return self.gateway.apply_correction(
-                arguments.get("base_memory_id"),
-                arguments.get("scope_id"),
-                correction_text=arguments.get("correction_text"),
-                reviewer=arguments.get("reviewer", "operator"),
-            )
-        if name == "record_exposure":
-            return self.gateway.record_exposure(arguments.get("run_id"), arguments.get("memory_id"))
-        if name == "save_draft":
-            return self.gateway.save_draft(arguments.get("scope_id"), arguments.get("title"), arguments.get("body"), arguments.get("citations"))
+        context = self.auth.authenticate_agent_context(self.agent_token)
+        if not context or not context[1]:
+            return {'ok': False, 'error': {'code': 'AUTH_REQUIRED', 'message': 'Use a valid project-scoped client token'}}
+        self.identity, self.project_id = context
+        if not self.projects.can_access(self.identity, self.project_id, write=name != 'list_memories'):
+            return {'ok': False, 'error': {'code': 'FORBIDDEN', 'message': 'Project membership does not allow this operation'}}
+        if name not in {'list_memories', 'create_memory', 'edit_memory'}:
+            return {'ok': False, 'error': {'code': 'LOCAL_BRIDGE_REQUIRED', 'message': 'Connect a local repository with python -m hivemind connect; the synthetic fixture is available through hivemind.demo'}}
         if name == "list_memories":
             identity = self._workspace_identity()
             if isinstance(identity, dict):
                 return identity
-            result = self.workspace.list_memories(self.project_id or "project:default")
+            result = self.workspace.list_memories(self.project_id)
             result["user"] = identity.public()
             return result
         if name == "create_memory":
             identity = self._workspace_identity()
             if isinstance(identity, dict):
                 return identity
-            return self.workspace.create(identity, arguments.get("title"), arguments.get("body"), arguments.get("tags"), self.project_id or "project:default")
+            return self.workspace.create(identity, arguments.get("title"), arguments.get("body"), arguments.get("tags"), self.project_id)
         if name == "edit_memory":
             identity = self._workspace_identity()
             if isinstance(identity, dict):
                 return identity
-            return self.workspace.edit(identity, arguments.get("memory_id"), arguments.get("title"), arguments.get("body"), arguments.get("tags"), self.project_id or "project:default")
+            return self.workspace.edit(identity, arguments.get("memory_id"), arguments.get("title"), arguments.get("body"), arguments.get("tags"), self.project_id)
         return {"ok": False, "error": {"code": "UNKNOWN_TOOL", "message": "Tool is not in the fixed HiveMind tool registry"}}
 
     def dispatch(self, request: Any) -> dict[str, Any] | None:
@@ -216,6 +211,9 @@ class MCPServer:
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point for ``python -m hivemind.mcp_server``."""
 
+    if os.environ.get('HIVEMIND_REPO'):
+        from .bridge import main as bridge_main
+        return bridge_main(['mcp', '--repo', os.environ['HIVEMIND_REPO']])
     parser = argparse.ArgumentParser(description="Run HiveMind's newline-delimited MCP server")
     parser.parse_args(argv)
     try:

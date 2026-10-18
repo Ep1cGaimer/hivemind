@@ -295,6 +295,7 @@
       state.positions = {};
       fillEditor(selectedMemory());
       renderProject();
+      await loadGitMemory();
     } catch (error) {
       dom.graph.innerHTML = "";
       dom.graphEmpty.hidden = false;
@@ -304,6 +305,93 @@
       dom.graph.removeAttribute("aria-busy");
     }
   }
+
+  let gitOverview = null;
+  let gitContext = null;
+  const gitRepoSelect = document.querySelector('#git-repository');
+  const gitContextSelect = document.querySelector('#git-context');
+  const gitFindings = document.querySelector('#git-findings');
+  const gitStatus = document.querySelector('#git-context-status');
+
+  function gitUrl(action) { return `/api/projects/${encodeURIComponent(state.project.id)}/git/${action}`; }
+
+  async function loadGitMemory() {
+    if (!state.project) return;
+    try {
+      const projectId = state.project.id;
+      const overview = await api(gitUrl('overview'));
+      if (state.project?.id !== projectId) return;
+      gitOverview = overview;
+      const selectedRepo = gitRepoSelect.value;
+      gitRepoSelect.innerHTML = overview.repository.map(r => `<option value="${escapeHtml(r.repo_id)}">${escapeHtml(r.data.remote)}</option>`).join('');
+      if (overview.repository.some(r => r.repo_id === selectedRepo)) gitRepoSelect.value = selectedRepo;
+      document.querySelector('#git-connect-command').textContent = `python -m hivemind connect --repo . --url ${location.origin} --project ${projectId} --client both`;
+      renderGitContexts();
+    } catch (error) { gitStatus.textContent = error.message; }
+  }
+
+  function renderGitContexts() {
+    const old = gitContextSelect.value;
+    const observations = (gitOverview?.observation || []).filter(o => o.repo_id === gitRepoSelect.value);
+    observations.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    gitContextSelect.innerHTML = observations.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.data.ref.replace('refs/heads/', ''))} · ${escapeHtml(o.head.slice(0, 8))} · ${escapeHtml(o.author)} · ${escapeHtml(o.branch_id)}</option>`).join('');
+    if (observations.some(o => o.id === old)) gitContextSelect.value = old;
+    if (!observations.length) {
+      gitContext = null;
+      gitStatus.textContent = 'Connect a local Git checkout to load conventions, branch learning, and task progress.';
+      gitFindings.replaceChildren();
+      return;
+    }
+    loadGitRecall();
+  }
+
+  async function gitOperation(action, payload) {
+    return api(gitUrl(action), { method: 'POST', body: JSON.stringify({ context_id: gitContext.id, ...payload }) });
+  }
+
+  async function loadGitRecall() {
+    gitContext = gitOverview.observation.find(o => o.id === gitContextSelect.value);
+    if (!gitContext) return;
+    const expected = gitContext.id;
+    gitStatus.textContent = 'Loading team context…';
+    try {
+      const result = await gitOperation('recall', { query: state.search });
+      if (gitContext?.id !== expected) return;
+      const incomplete = Object.entries(result.completeness).some(([key, value]) => key.endsWith('_complete') && value === false) || Object.values(gitOverview.completeness).includes(false);
+      gitStatus.textContent = `Recorded checkout ${result.head.slice(0, 12)} · ${date(gitContext.created_at)}. ${incomplete ? 'History or source coverage is incomplete; absence is not proof.' : 'History and source manifests are complete.'} This view uses a recorded machine observation.`;
+      const groups = [
+        ['Project conventions', result.findings.filter(m => m.collection === 'conventions')],
+        ['Branch findings', result.findings.filter(m => m.collection !== 'conventions' && m.applicability === 'applicable')],
+        ['Team WIP and changed sources', result.findings.filter(m => m.collection !== 'conventions' && m.applicability !== 'applicable')],
+        ['Task checkpoints', result.checkpoints],
+      ];
+      gitFindings.innerHTML = groups.map(([title, items]) => `<section class="git-collection"><h3>${title} <span class="quiet-label">${items.length}</span></h3>${items.length ? items.map(m => `<article class="git-memory" data-revision="${escapeHtml(m.id)}"><div><strong>${escapeHtml(m.title)}</strong><span class="git-state" data-applicability="${escapeHtml(m.applicability)}">${escapeHtml(m.applicability.replaceAll('_', ' '))}</span></div><p>${escapeHtml(m.body)}</p><small>${escapeHtml(m.author)} · ${escapeHtml(m.classification)} · ${escapeHtml(m.collection)} · source ${escapeHtml(m.source_commit.slice(0, 8))}</small><p class="form-help">${escapeHtml(m.paths.join(', ') || 'Recorded decision without a code claim')}</p><button class="button button-quiet" type="button" data-inspect-revision="${escapeHtml(m.id)}">Inspect provenance</button>${state.project.role !== 'viewer' && m.kind === 'finding' ? `<button class="button button-quiet" type="button" data-propose-revision="${escapeHtml(m.id)}">Propose convention</button>` : ''}</article>`).join('') : '<p class="form-help">No relevant items in this context.</p>'}</section>`).join('');
+      const conflicts = result.conflicts.map(c => `<p class="git-warning">Unresolved disagreement: ${escapeHtml(c.revision_ids.join(', '))}. Inspect both revisions.</p>`).join('');
+      const accepted = new Set(gitOverview.accepted_promotion.map(p => p.data.memory_id));
+      const proposals = gitOverview.promotion.filter(p => p.repo_id === gitContext.repo_id && !accepted.has(p.data.memory_id));
+      gitFindings.insertAdjacentHTML('beforeend', `<section class="git-collection"><h3>Conflicts and proposals</h3>${conflicts}${proposals.map(p => `<article class="git-memory"><p>Convention proposed by ${escapeHtml(p.author)}. Source conditions remain attached.</p><button type="button" class="button button-quiet" data-inspect-revision="${escapeHtml(p.data.memory_id)}">Inspect proposal</button>${state.project.role === 'owner' ? `<button type="button" class="button button-secondary" data-accept-revision="${escapeHtml(p.data.memory_id)}">Accept convention</button>` : ''}</article>`).join('')}${!conflicts && !proposals.length ? '<p class="form-help">No unresolved conflicts or pending proposals.</p>' : ''}</section>`);
+    } catch (error) { gitStatus.textContent = error.message; }
+  }
+
+  document.querySelector('#refresh-git').addEventListener('click', loadGitMemory);
+  gitRepoSelect.addEventListener('change', renderGitContexts);
+  gitContextSelect.addEventListener('change', loadGitRecall);
+  gitFindings.addEventListener('click', async event => {
+    const inspect = event.target.closest('[data-inspect-revision]');
+    const propose = event.target.closest('[data-propose-revision]');
+    const accept = event.target.closest('[data-accept-revision]');
+    try {
+      if (inspect) {
+        const result = await gitOperation('explain', { memory_id: inspect.dataset.inspectRevision });
+        document.querySelector('#git-explanation').textContent = JSON.stringify(result, null, 2);
+        const panel = document.querySelector('#git-inspect'); panel.hidden = false; panel.open = true;
+      } else if (propose || accept) {
+        await gitOperation(accept ? 'accept' : 'propose', { memory_id: accept ? accept.dataset.acceptRevision : propose.dataset.proposeRevision });
+        toast(accept ? 'Convention accepted with its source conditions.' : 'Convention proposed for human review.');
+        await loadGitMemory();
+      }
+    } catch (error) { toast(error.message, 'error'); }
+  });
 
   function selectMemory(memoryId) {
     const memory = state.memories.find((item) => item.id === memoryId);

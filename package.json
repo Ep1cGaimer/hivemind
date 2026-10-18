@@ -1,0 +1,12 @@
+{
+  "name": "hivemind-local-tools",
+  "private": true,
+  "description": "Pinned local tooling for HiveMind native OpenCode verification",
+  "devDependencies": {
+    "@opencode/cli": "2.0.32",
+    "playwright": "1.55.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

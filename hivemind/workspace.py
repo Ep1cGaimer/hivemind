@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import secrets
-import secrets
 from typing import Any, Iterable
 
 from .auth import Identity
@@ -266,7 +265,9 @@ class ProjectWorkspace:
             return None
         if project.owner_user_id == identity.user_id:
             return "owner"
-        member = next((item for item in self._members(project_id) if item.user_id == identity.user_id), None)
+        member = self.store.get_node(deterministic_id('project-member', project_id, identity.user_id))
+        if not isinstance(member, ProjectMember) or member.workspace_project_id != project_id:
+            return None
         return member.role if member else None
 
     def can_access(self, identity: Identity, project_id: str, write: bool = False) -> bool:
@@ -276,7 +277,6 @@ class ProjectWorkspace:
         return not write or role in {"owner", "editor"}
 
     def list_projects(self, identity: Identity) -> dict[str, Any]:
-        self.ensure_default(identity)
         projects = [
             project
             for project in self._projects()

@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 from typing import Any, Mapping, TypeVar
+from types import MappingProxyType
 
 
 JSONPrimitive = None | bool | int | float | str
@@ -318,6 +319,35 @@ class GraphEdge:
     properties: Mapping[str, Any]
 
 
+@dataclass(frozen=True)
+class GitRecord:
+    """Immutable repository event/revision; kind selects its documented schema."""
+
+    id: str
+    tenant_id: str
+    project_id: str
+    workspace_project_id: str
+    repo_id: str
+    kind: str
+    key: str
+    branch_id: str
+    head: str
+    snapshot_id: str
+    author: str
+    session: str
+    created_at: str
+    data: Mapping[str, Any]
+
+    def __post_init__(self):
+        def freeze(value):
+            if isinstance(value, Mapping):
+                return MappingProxyType({key: freeze(item) for key, item in value.items()})
+            if isinstance(value, (list, tuple)):
+                return tuple(freeze(item) for item in value)
+            return value
+        object.__setattr__(self, 'data', freeze(self.data))
+
+
 DOMAIN_RECORD_TYPES = (
     CompanyEntity,
     Scope,
@@ -332,6 +362,7 @@ DOMAIN_RECORD_TYPES = (
     WorkspaceMemory,
     WorkspaceProject,
     ProjectMember,
+    GitRecord,
 )
 
 
